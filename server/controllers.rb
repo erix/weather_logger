@@ -48,7 +48,7 @@ class App < Sinatra::Base
     # 5: humidity one
     # 6: humidity tens
 
-    return nil if not valid?(report)
+    # return nil if not valid?(report)
 
     a = report.unpack('a4@13h@10hh@8h@12h@15h')
     sign = a[1].eql?("0") ? "+" : "-"
