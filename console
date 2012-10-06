@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+RACK_ENV=development irb -r ./server/application.rb

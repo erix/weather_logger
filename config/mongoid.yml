@@ -1,0 +1,6 @@
+development:
+  sessions:
+    default:
+      hosts:
+        - localhost:27017
+      database: weather_db
