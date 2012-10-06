@@ -9,7 +9,7 @@ class Weather.Collections.Readings extends Backbone.Collection
   url: '/stations/'
 
   initialize: (options)->
-    @st_model = "1234"
+    @st_model = "1a3d"
 
   setDate: (date) ->
     console.log "SetDate"
@@ -90,7 +90,7 @@ class Weather.Routers.Router extends Backbone.Router
     "stations/:model_id": 'showChart'
 
   redirectToToday: ->
-    Backbone.history.navigate("stations/1234", true)
+    Backbone.history.navigate("stations/1a3d", true)
 
   showChart: (model_id) ->
     console.log "Router"
