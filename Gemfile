@@ -1,12 +1,12 @@
 source :rubygems
 
 gem 'bootstrap-sass'
-gem 'coffee-script'
+gem 'coffee-script', :require => 'coffee-script'
 gem 'compass'
 gem 'haml'
 gem 'less'
 gem 'newrelic_rpm'
-gem 'sass'
+gem 'sass', :require => 'sass'
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'sprockets'
