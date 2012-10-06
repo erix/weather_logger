@@ -4,3 +4,6 @@ development:
       hosts:
         - localhost:27017
       database: weather_db
+
+production:
+  uri: <%= ENV['MONGOLAB_URI'] %>
