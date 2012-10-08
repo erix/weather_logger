@@ -44,7 +44,7 @@ class App < Sinatra::Base
     sign = a[1].eql?("0") ? "+" : "-"
 
     parsed = {
-      station: a[0],
+      station: a[0].downcase,
       reading: {
         temp: "%s%s%s.%s" % [sign, a[2..4]].flatten,
         hum: "#{a[6]}#{a[5]}".to_i
@@ -102,7 +102,7 @@ class App < Sinatra::Base
 
     # p parsed
 
-    station = Station.find_or_create_by(model:parsed[:station])
+    station = Station.find_by(model:parsed[:station]) || Station.create(model:parsed[:station], description:"Unknown")
     if station
       reading = Reading.new parsed[:reading]
       station.readings << reading

@@ -1,6 +1,7 @@
 require 'colored'
 require 'guard'
 require 'jasmine'
+
 # custom config directory hack
 Jasmine::Config.class_eval do
   def simple_config_file
@@ -9,6 +10,7 @@ Jasmine::Config.class_eval do
 end
 load 'jasmine/tasks/jasmine.rake'
 require './lib/sprockets_environment_builder'
+require './server/application.rb'
 
 task :start do
   sh %{rerun --dir server -- foreman start}
@@ -22,6 +24,12 @@ end
 task :test do
   Rake::Task["assets:compile_all"].invoke
   Rake::Task["jasmine"].invoke
+end
+
+task :create_stations do
+  p "Creating stations to the DB"
+  Station.create(model:"1a2d", description:"Inside sensor")
+  Station.create(model:"1a3d", description:"Outside sensor")
 end
 
 namespace :assets do
