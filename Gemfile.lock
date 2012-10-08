@@ -149,7 +149,7 @@ DEPENDENCIES
   bootstrap-sass
   bson_ext
   coffee-script
-  colored
+  colored (~> 1.2)
   compass
   database_cleaner
   execjs
