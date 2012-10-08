@@ -17,6 +17,7 @@ gem 'unicorn'
 gem 'yui-compressor'
 gem 'mongoid'
 gem 'bson_ext'
+gem 'colored', '~>1.2'
 
 group :assets do
   gem 'execjs'
