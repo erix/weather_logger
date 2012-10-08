@@ -1,33 +1,30 @@
-require 'colored'
-require 'guard'
-require 'jasmine'
-
-# custom config directory hack
-Jasmine::Config.class_eval do
-  def simple_config_file
-    File.join(project_root, 'config/jasmine.yml')
-  end
-end
-load 'jasmine/tasks/jasmine.rake'
-require './lib/sprockets_environment_builder'
-require './server/application.rb'
-
 task :start do
   sh %{rerun --dir server -- foreman start}
 end
 
 task :guard do
+  require 'guard'
   Rake::Task["assets:compile_all"].invoke
   ::Guard.start
 end
 
 task :test do
+  require 'jasmine'
+  # custom config directory hack
+  Jasmine::Config.class_eval do
+    def simple_config_file
+      File.join(project_root, 'config/jasmine.yml')
+    end
+  end
+
+  load 'jasmine/tasks/jasmine.rake'
   Rake::Task["assets:compile_all"].invoke
   Rake::Task["jasmine"].invoke
 end
 
-task :create_stations do
-  p "Creating stations to the DB"
+desc 'Creates seed data to DB'
+task :seed do
+  require './server/application.rb'
   Station.create(model:"1a2d", description:"Inside sensor")
   Station.create(model:"1a3d", description:"Outside sensor")
 end
@@ -36,6 +33,8 @@ namespace :assets do
   desc 'compile sprockets to static files for testing purposes'
 
   task :compile_all do
+    require 'colored'
+    require './lib/sprockets_environment_builder'
     %w{javascripts stylesheets specs}.each do |asset|
       Rake::Task["assets:compile_#{asset}"].invoke
     end
@@ -56,6 +55,7 @@ namespace :assets do
 end
 
 def compile_asset(parent_dir, filename, environment)
+  require 'colored'
   sprockets = SprocketsEnvironmentBuilder.build(environment)
   FileUtils.mkdir_p(parent_dir)
   sprockets.find_asset(filename).write_to(File.join(parent_dir, filename))
