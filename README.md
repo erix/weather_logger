@@ -1,22 +1,13 @@
-Features Backbone.js, Twitter Bootstrap, Jasmine, Sprockets (CoffeeScript, SASS, and JST support), and more.
+Simple web service for logging the Oregon Scientific wireless temperature sensor readings.
 
-### install
+The app was built on using the following technologies:
+* Sinatra
+* Backbone.js
+* Twitter Bootstrap
+* CoffeeScript
+* Sass
+* Compass
 
-    git clone https://github.com/6/sinatra-backbone-boilerplate.git your_app
-    cd your_app
-    git remote rm origin
-    git remote add upstream https://github.com/6/sinatra-backbone-boilerplate.git
-    bundle install
+The app is deployed to Heroku.
 
-### run
-
-    rake start
-    rake guard
-    rake test
-
-Open [http://localhost:5000](http://localhost:5000) for the web app and [http://localhost:8888](http://localhost:8888) for Jasmine.
-
-### pulling in updates
-
-    git fetch upstream
-    git merge upstream/master
+The reporting device is built on top of Arduino and a cheap 433Mhz RF receiver. The sketch for Arduino is available in my Arduino repository: erix/arduino/weather
