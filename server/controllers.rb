@@ -11,7 +11,7 @@ class Reading
 
   field :temp, type: Float
   field :hum, type: Integer
-  field :created_at, type: DateTime
+  field :created_at, type: Time, default: ->{ Time.now }
 
   belongs_to :station
 end
@@ -23,20 +23,10 @@ class App < Sinatra::Base
     checksum = a[8].hex
 
     sum = 0
-    message[0..-4].each_char do |c|
-      sum = sum + c.hex
-    end
-
-    return ((sum - 10) & 0xFF) == checksum
-    #   for counter in [len(bytes) – 2]:
-    # CheckSumCalculated = CheckSumCalculated + (bytes[ElementCounter] >> 4)
-    # CheckSumCalculated = CheckSumCalculated + (bytes[ElementCounter] & 0x0F)
-    # 
-    # CheckSumCalculated = CheckSumCalculated – 10
-    # CheckSumCalculated = (CheckSumCalculated & 0xFF) # Bottom 8 bits (not 7 as stated in docs)
-    # 
-
+    message[0..-5].each_char {|c| sum = sum + c.hex}
+    ((sum - 10) & 0xFF) == checksum
   end
+
   #parses OSV2 report
   #http://www.mattlary.com/2012/06/23/weather-station-project/
   def parseReport(report)
@@ -48,7 +38,7 @@ class App < Sinatra::Base
     # 5: humidity one
     # 6: humidity tens
 
-    # return nil if not valid?(report)
+    return nil if not valid?(report)
 
     a = report.unpack('a4@13h@10hh@8h@12h@15h')
     sign = a[1].eql?("0") ? "+" : "-"
@@ -66,9 +56,13 @@ class App < Sinatra::Base
 
   def fetch_station_for_date(model, date)
     station = Station.find_by(model:model)
-    range = Range.new(date, date + 86400) #range is +1 day
-    readings = station.readings.where(created_at: range)
-    readings
+    if station
+      range = Range.new(date, date + 86400) #range is +1 day
+      readings = station.readings.where(created_at: range)
+      readings
+    else
+      nil
+    end
   end
 
   get "/" do
@@ -80,30 +74,42 @@ class App < Sinatra::Base
     content_type :json
     today = Time.now
     readings = fetch_station_for_date(model, Time.new(today.year, today.month, today.day))
-    readings.to_json
+    if readings
+      readings.to_json
+    else
+      status 404
+    end
   end
 
-  get "/stations/:model/:year/:month/:date" do |model, year, month, day|
+  get "/stations/:model/:year/:month/:day" do |model, year, month, day|
     content_type :json
     date = Time.new(year.to_i, month.to_i, day.to_i)
     readings = fetch_station_for_date(model, date)
-    readings.to_json
+    if readings
+      readings.to_json
+    else
+      status 404
+    end
   end
 
   get "/save" do
     parsed = parseReport(params[:report])
 
-    # if not parsed
-    #   return "Invalid data"
-    # end
+    if not parsed
+      status 500
+      return "Invalid data"
+    end
 
-    p parsed
+    # p parsed
 
     station = Station.find_or_create_by(model:parsed[:station])
-    reading = Reading.new parsed[:reading]
-    station.readings << reading
-
-    "Station: temperature #{parsed[:reading][:temp]} - humidity: #{parsed[:reading][:hum]}%"
-
+    if station
+      reading = Reading.new parsed[:reading]
+      station.readings << reading
+      "Station: temperature #{parsed[:reading][:temp]} - humidity: #{parsed[:reading][:hum]}%"
+    else
+      status 500
+      "Cannot create DB entry"
+    end
   end
 end

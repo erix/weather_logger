@@ -29,6 +29,9 @@ end
 
 group :test do
   gem 'jasmine'
+  gem 'rspec'
+  gem 'database_cleaner'
+  gem 'json_spec', '~>1.0.3'
 end
 
 group :development, :test do
