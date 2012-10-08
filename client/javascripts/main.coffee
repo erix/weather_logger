@@ -9,7 +9,7 @@ class Weather.Collections.Readings extends Backbone.Collection
   url: '/stations/'
 
   initialize: (options)->
-    @st_model = "1a3d"
+    @st_model = "1a2d"
 
   setDate: (date) ->
     console.log "SetDate"
@@ -96,7 +96,7 @@ class Weather.Routers.Router extends Backbone.Router
     console.log "Router"
     station = new Weather.Collections.Readings
     view = new Weather.Views.Chart(collection:station)
-    station.setDate(new Date(2012,9,1))
+    station.setDate new Date
 
 $ ->
   r = new Weather.Routers.Router
