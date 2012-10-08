@@ -36,7 +36,6 @@ group :test do
 end
 
 group :development, :test do
-  gem 'colored'
   gem 'guard'
   gem 'guard-shell'
   gem 'rake'
