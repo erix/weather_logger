@@ -7,3 +7,4 @@
       %a.next.icons-right
   #chart
     .loader
+    #chart-container

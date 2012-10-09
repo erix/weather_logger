@@ -84,20 +84,20 @@ class Weather.Views.Chart extends Backbone.View
   _renderChart: ->
     chart = new Highcharts.Chart
       chart:
-        renderTo: 'chart'
+        renderTo: 'chart-container'
       title:
         text: ''
       yAxis: [
         {
           title:
             text: 'Tempearture (C)'
-          min: -10
-          max: 35
         },
         {
           title:
             text: 'Humidity (%)'
           opposite: true
+          min: 0
+          max: 100
         }
       ]
       xAxis:
