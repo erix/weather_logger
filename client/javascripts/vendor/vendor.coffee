@@ -4,6 +4,5 @@
 #= require ./bootstrap-tooltip
 #= require ./bootstrap-transition
 #= require ./bootstrap-datepicker
-#= require ./raphael
-#= require ./morris
+#= require ./highcharts
 #= require_tree .

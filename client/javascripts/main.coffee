@@ -9,7 +9,7 @@ class Weather.Collections.Readings extends Backbone.Collection
   url: '/stations/'
 
   initialize: (options)->
-    @st_model = "1a2d"
+    @st_model = "1234"
 
   setDate: (date) ->
     console.log "SetDate"
@@ -71,32 +71,68 @@ class Weather.Views.Chart extends Backbone.View
       )
 
   _renderChart: ->
-    Morris.Line
-      element: 'chart'
-      data: @collection.toJSON()
-      xkey: 'created_at'
-      ykeys: ['temp', 'hum']
-      xLabels: 'hour'
-      labels: ['Temperature', 'Humidity']
-      lineSize: 1
-      pointSize: 2
-      hideHover: true
+    dates = for dateString in @collection.pluck("created_at")
+      date = new Date(dateString)
+      date.getTime()
 
+    temps = @collection.pluck("temp")
+    hums = @collection.pluck("hum")
+
+    tempSeries = for i in [0...dates.length]
+      a[i] for a in [dates, temps]
+
+    humSeries = for i in [0...dates.length]
+      a[i] for a in [dates, hums]
+
+    chart = new Highcharts.Chart
+      chart:
+        renderTo: 'chart'
+      title:
+        text: ''
+      yAxis: [
+        {
+          title:
+            text: 'Tempearture (C)'
+        },
+        {
+          title:
+            text: 'Humidity (%)'
+          opposite: true
+        }
+      ]
+      xAxis:
+        type: "datetime"
+      series: [
+        {
+          name: "Temperature"
+          data: tempSeries
+        },
+        {
+          name: 'Humidity'
+          data: humSeries
+          yAxis: 1
+        }
+      ]
 
 
 class Weather.Routers.Router extends Backbone.Router
   routes:
     "": "redirectToToday"
-    "stations/:model_id": 'showChart'
+    "stations/:model_id/:year/:month/:day": 'showChart'
+
+  initialize: ->
+    @station = new Weather.Collections.Readings
+    @view = new Weather.Views.Chart(collection:@station)
 
   redirectToToday: ->
-    Backbone.history.navigate("stations/1a3d", true)
+    # today = new Date
+    today = new Date 2012,9,1
+    Backbone.history.navigate("stations/1a3d/#{today.getFullYear()}/#{today.getMonth() + 1}/#{today.getDate()}", true)
 
-  showChart: (model_id) ->
+  showChart: (model_id , year, month, day)->
     console.log "Router"
-    station = new Weather.Collections.Readings
-    view = new Weather.Views.Chart(collection:station)
-    station.setDate new Date
+    date = new Date parseInt(year), parseInt(month)-1, parseInt(day)
+    @station.setDate date
 
 $ ->
   r = new Weather.Routers.Router
