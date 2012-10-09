@@ -51,6 +51,10 @@ class Weather.Views.Chart extends Backbone.View
     console.log "View create", @collection
     @collection.on "reset", @render, this
 
+    Highcharts.setOptions
+      global:
+        useUTC: false
+
   render: ->
     @$('.loader').hide()
     date = @collection.currentDate()
@@ -91,6 +95,8 @@ class Weather.Views.Chart extends Backbone.View
         {
           title:
             text: 'Tempearture (C)'
+          min: -20
+          max: 30
         },
         {
           title:
@@ -102,6 +108,7 @@ class Weather.Views.Chart extends Backbone.View
       ]
       xAxis:
         type: "datetime"
+
       series: @_dataForChart()
 
   _dataForChart: ->
