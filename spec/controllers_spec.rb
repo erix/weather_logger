@@ -38,4 +38,32 @@ describe "Weather service" do
       last_response.should be_ok
     end
   end
+
+  it "should return all station readings for a given date" do
+    Station.create(model:'1234', description:'Test1').readings << Reading.new(temp:10.0, hum:20)
+    Station.create(model:'1235', description:'Test2').readings << Reading.new(temp:11.0, hum:21)
+
+    expected = <<END
+[
+  {
+    "name":"Test1",
+    "readings": [
+      {"temp":10.0, "hum":20}
+    ]
+  },
+  {
+    "name":"Test2",
+    "readings":[
+      {"temp":11.0, "hum":21}
+    ]
+  }
+]
+END
+
+    todayURL = "/#{Time.now.year}/#{Time.now.month}/#{Time.now.day}"
+    get todayURL do
+      last_response.should be_ok
+      last_response.body.should be_json_eql(expected).excluding("_id", "station_id", "created_at")
+    end
+  end
 end

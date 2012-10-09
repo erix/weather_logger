@@ -18,7 +18,6 @@ gem 'unicorn'
 gem 'yui-compressor'
 gem 'mongoid'
 gem 'bson_ext'
-gem 'colored', '~>1.2'
 
 group :assets do
   gem 'execjs'
@@ -40,4 +39,5 @@ group :development, :test do
   gem 'guard'
   gem 'guard-shell'
   gem 'rake'
+  gem 'colored', '~>1.2'
 end

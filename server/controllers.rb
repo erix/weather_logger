@@ -54,8 +54,7 @@ class App < Sinatra::Base
     return parsed
   end
 
-  def fetch_station_for_date(model, date)
-    station = Station.find_by(model:model)
+  def fetch_station_for_date(station, date)
     if station
       range = Range.new(date, date + 86400) #range is +1 day
       readings = station.readings.where(created_at: range)
@@ -73,7 +72,8 @@ class App < Sinatra::Base
   get "/stations/:model" do |model|
     content_type :json
     today = Time.now
-    readings = fetch_station_for_date(model, Time.new(today.year, today.month, today.day))
+    station = Station.find_by(model:model)
+    readings = fetch_station_for_date(station, Time.new(today.year, today.month, today.day))
     if readings
       readings.to_json
     else
@@ -84,12 +84,24 @@ class App < Sinatra::Base
   get "/stations/:model/:year/:month/:day" do |model, year, month, day|
     content_type :json
     date = Time.new(year.to_i, month.to_i, day.to_i)
-    readings = fetch_station_for_date(model, date)
+    station = Station.find_by(model:model)
+    readings = fetch_station_for_date(station, date)
     if readings
       readings.to_json
     else
       status 404
     end
+  end
+
+  get "/:year/:month/:day" do |year, month, day|
+    content_type :json
+    response = []
+    date = Time.new(year.to_i, month.to_i, day.to_i)
+
+    Station.each do |station|
+      response << {name: station.description, readings: fetch_station_for_date(station, date)}
+    end
+    response.to_json
   end
 
   get "/save" do
