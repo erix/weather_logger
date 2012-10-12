@@ -26,7 +26,7 @@ class Weather.Models.Station extends Backbone.Model
   getHumidities: ->
       _.pluck(@get("readings"),"hum")
 
-class Weather.Collections.Readings extends Backbone.Collection
+class Weather.Collections.Stations extends Backbone.Collection
   model: Weather.Models.Station
 
   initialize:->
@@ -34,14 +34,10 @@ class Weather.Collections.Readings extends Backbone.Collection
     @notifier.on "notifier:data", @newData, this
 
   newData: (data) ->
-    console.log "Data arrived ", data
-    station = model for model in @models when model.get("name") == data.message.name
-    console.log "Append data", station
-    station.get("readings").push data.message.reading
-    @trigger "append"
+    station = @get(data.message.station_id)
+    station.get("readings").push data.message
 
   setDate: (date) ->
-    console.log "SetDate"
     [year, month, day] = [date.getFullYear(), date.getMonth()+1, date.getDate()]
     [@year, @month, @day] = [year, month, day]
     @url = "/#{year}/#{month}/#{day}"
@@ -68,13 +64,19 @@ class Weather.Views.Chart extends Backbone.View
     "click .prev": "prevDate"
 
   initialize: ->
-    console.log "View create", @collection
     @collection.on "reset", @render, this
-    @collection.on "append", @render, this
+    @collection.on "append", @appendPoint, this
 
     Highcharts.setOptions
       global:
         useUTC: false
+
+  appendPoint: (data) ->
+    if @chart
+      date = new Date(data.created_at)
+      @chart.get("#{data.station_id}temp").addPoint([date.getTime(), data.temp], false)
+      @chart.get("#{data.station_id}hum").addPoint([date.getTime(), data.hum], false)
+      @chart.redraw()
 
   render: ->
     @$('.loader').hide()
@@ -134,7 +136,6 @@ class Weather.Views.Chart extends Backbone.View
       series: @_dataForChart()
 
   _dataForChart: ->
-    console.log "Series"
     series = []
     @collection.each (station)->
       name = station.get("name")
@@ -148,9 +149,8 @@ class Weather.Views.Chart extends Backbone.View
       humSeries = for i in [0...dates.length]
         a[i] for a in [dates, hums]
 
-      series.push {name: "#{name} Temperature",data: tempSeries}
-      series.push {name: "#{name} Humidity",data:humSeries, yAxis:1}
-    console.log series
+      series.push {id: "#{station.id}temp", name: "#{name} Temperature",data: tempSeries}
+      series.push {id: "#{station.id}hum", name: "#{name} Humidity",data:humSeries, yAxis:1}
     series
 
 
@@ -161,7 +161,7 @@ class Weather.Routers.Router extends Backbone.Router
     ":year/:month/:day": 'showChart'
 
   initialize: ->
-    @station = new Weather.Collections.Readings
+    @station = new Weather.Collections.Stations
     @view = new Weather.Views.Chart(collection:@station)
 
   redirectToToday: ->
@@ -170,7 +170,6 @@ class Weather.Routers.Router extends Backbone.Router
     Backbone.history.navigate("#{today.getFullYear()}/#{today.getMonth() + 1}/#{today.getDate()}", true)
 
   showChart: (year, month, day)->
-    console.log "Router"
     date = new Date parseInt(year), parseInt(month)-1, parseInt(day)
     @station.setDate date
 

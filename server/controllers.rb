@@ -99,7 +99,7 @@ class App < Sinatra::Base
     date = Time.new(year.to_i, month.to_i, day.to_i)
 
     Station.each do |station|
-      response << {name: station.description, readings: fetch_station_for_date(station, date)}
+      response << {id: station.id, name: station.description, readings: fetch_station_for_date(station, date)}
     end
     response.to_json
   end
@@ -118,8 +118,7 @@ class App < Sinatra::Base
     if station
       reading = Reading.new parsed[:reading]
       station.readings << reading
-      response = {name:station.description, reading:reading.attributes}
-      Pusher['weather'].trigger('reading', {:message => response})
+      Pusher['weather'].trigger('reading', {:message => reading.attributes}) unless settings.environment == :test
       "Station: temperature #{parsed[:reading][:temp]} - humidity: #{parsed[:reading][:hum]}%"
     else
       status 500
