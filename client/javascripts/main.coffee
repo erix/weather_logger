@@ -36,6 +36,7 @@ class Weather.Collections.Stations extends Backbone.Collection
   newData: (data) ->
     station = @get(data.message.station_id)
     station.get("readings").push data.message
+    @trigger "append", data.message
 
   setDate: (date) ->
     [year, month, day] = [date.getFullYear(), date.getMonth()+1, date.getDate()]
