@@ -1,5 +1,4 @@
 source :rubygems
-ruby '1.9.3'
 
 gem 'bootstrap-sass'
 gem 'coffee-script', :require => 'coffee-script'
