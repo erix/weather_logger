@@ -1,9 +1,10 @@
 development:
   sessions:
     default:
-      hosts:
-        - localhost:27017
-      database: weather_db
+      uri: <%= ENV['MONGOLAB_URI'] %>
+      # hosts:
+      #   - localhost:27017
+      # database: weather_db
   options:
     raise_not_found_error: false
 

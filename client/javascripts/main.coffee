@@ -3,7 +3,16 @@ window.Weather = {
   Models: {}
   Views: {}
   Routers: {}
+  Events: {}
 }
+
+class Weather.Events.Notifier
+  constructor: ->
+    _.extend(this, Backbone.Events)
+    @pusher = new Pusher('aaf8a36f8f5c57b42051');
+    @channel = @pusher.subscribe('weather')
+    @channel.bind "reading", (data)=>
+      @trigger "notifier:data", data
 
 class Weather.Models.Station extends Backbone.Model
   getDates: ->
@@ -19,6 +28,17 @@ class Weather.Models.Station extends Backbone.Model
 
 class Weather.Collections.Readings extends Backbone.Collection
   model: Weather.Models.Station
+
+  initialize:->
+    @notifier = new Weather.Events.Notifier
+    @notifier.on "notifier:data", @newData, this
+
+  newData: (data) ->
+    console.log "Data arrived ", data
+    station = model for model in @models when model.get("name") == data.message.name
+    console.log "Append data", station
+    station.get("readings").push data.message.reading
+    @trigger "append"
 
   setDate: (date) ->
     console.log "SetDate"
@@ -50,6 +70,7 @@ class Weather.Views.Chart extends Backbone.View
   initialize: ->
     console.log "View create", @collection
     @collection.on "reset", @render, this
+    @collection.on "append", @render, this
 
     Highcharts.setOptions
       global:
@@ -86,7 +107,8 @@ class Weather.Views.Chart extends Backbone.View
       )
 
   _renderChart: ->
-    chart = new Highcharts.Chart
+    @chart.destroy() if @chart
+    @chart = new Highcharts.Chart
       chart:
         renderTo: 'chart-container'
       title:
@@ -128,6 +150,7 @@ class Weather.Views.Chart extends Backbone.View
 
       series.push {name: "#{name} Temperature",data: tempSeries}
       series.push {name: "#{name} Humidity",data:humSeries, yAxis:1}
+    console.log series
     series
 
 

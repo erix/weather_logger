@@ -1,8 +1,6 @@
 #= require ./jquery
-#= require ./underscore
+#= require ./lodash
 #= require ./backbone
-#= require ./bootstrap-tooltip
-#= require ./bootstrap-transition
 #= require ./bootstrap-datepicker
 #= require ./highcharts
-#= require_tree .
+#= require ./hamlcoffee

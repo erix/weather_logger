@@ -118,6 +118,8 @@ class App < Sinatra::Base
     if station
       reading = Reading.new parsed[:reading]
       station.readings << reading
+      response = {name:station.description, reading:reading.attributes}
+      Pusher['weather'].trigger('reading', {:message => response})
       "Station: temperature #{parsed[:reading][:temp]} - humidity: #{parsed[:reading][:hum]}%"
     else
       status 500

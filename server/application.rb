@@ -2,6 +2,7 @@ require 'sinatra'
 require 'sinatra/contrib'
 require 'json'
 require "mongoid"
+require 'pusher'
 
 %w[lib server].each do |dir|
   Dir.glob("./#{dir}/*.rb").each do |relative_path|
@@ -9,6 +10,10 @@ require "mongoid"
     require relative_path  unless relative_path == "./server/application.rb"
   end
 end
+
+Pusher.app_id = ENV['PUSHER_ID']
+Pusher.key = ENV['PUSHER_KEY']
+Pusher.secret = ENV['PUSHER_SECRET']
 
 set :sprockets, SprocketsEnvironmentBuilder.build(ENV['RACK_ENV'] || 'development')
 

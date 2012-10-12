@@ -18,6 +18,7 @@ gem 'unicorn'
 gem 'yui-compressor'
 gem 'mongoid'
 gem 'bson_ext'
+gem 'pusher'
 
 group :assets do
   gem 'execjs'
