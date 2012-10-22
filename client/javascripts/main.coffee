@@ -1,9 +1,10 @@
-window.Weather = {
+window.Weather = window.Weather || {
   Collections: {}
   Models: {}
   Views: {}
   Routers: {}
   Events: {}
+  Globals: {}
 }
 
 class Weather.Events.Notifier
@@ -30,8 +31,11 @@ class Weather.Collections.Stations extends Backbone.Collection
   model: Weather.Models.Station
 
   initialize:->
-    @notifier = new Weather.Events.Notifier
+    Weather.Globals.notifier = Weather.Globals.notifier || new Weather.Events.Notifier
+    @notifier = Weather.Globals.notifier
     @notifier.on "notifier:data", @newData, this
+    date = new Date
+    @_setDate(date)
 
   newData: (data) ->
     station = @get(data.message.station_id)
@@ -39,11 +43,13 @@ class Weather.Collections.Stations extends Backbone.Collection
     @trigger "append", data.message
 
   setDate: (date) ->
-    [year, month, day] = [date.getFullYear(), date.getMonth()+1, date.getDate()]
-    [@year, @month, @day] = [year, month, day]
-    @url = "/#{year}/#{month}/#{day}"
+    @_setDate(date)
+    @url = "/#{@year}/#{@month}/#{@day}"
     Backbone.history.navigate(@url)
     @fetch()
+
+  _setDate: (date)->
+    [@year, @month, @day] = [date.getFullYear(), date.getMonth()+1, date.getDate()]
 
   currentDate: ->
     new Date(@year, @month - 1, @day)
@@ -162,18 +168,18 @@ class Weather.Routers.Router extends Backbone.Router
     ":year/:month/:day": 'showChart'
 
   initialize: ->
-    @station = new Weather.Collections.Stations
-    @view = new Weather.Views.Chart(collection:@station)
+    @stations = Weather.Globals.stations || new Weather.Collection.Stations
+    @view = new Weather.Views.Chart(collection:@stations)
+    @view.render()
 
   redirectToToday: ->
     today = new Date
-    # today = new Date 2012,9,1
-    Backbone.history.navigate("#{today.getFullYear()}/#{today.getMonth() + 1}/#{today.getDate()}", true)
+    Backbone.history.navigate("#{today.getFullYear()}/#{today.getMonth() + 1}/#{today.getDate()}", false)
 
   showChart: (year, month, day)->
     date = new Date parseInt(year), parseInt(month)-1, parseInt(day)
-    @station.setDate date
+    @stations.setDate date
 
 $ ->
-  r = new Weather.Routers.Router
+  new Weather.Routers.Router
   Backbone.history.start()

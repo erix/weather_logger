@@ -1,2 +1,5 @@
 - content_for :custom_head do
   %meta{:name => "keywords", :content => "1,2,3"}
+
+:javascript
+  Weather.Globals.stations = new Weather.Collections.Stations(#{@stations.to_json})

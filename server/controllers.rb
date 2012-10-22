@@ -64,16 +64,29 @@ class App < Sinatra::Base
     end
   end
 
+  def fetch_for_date(date)
+    response = []
+    Station.each do |station|
+      response << {id: station.id, name: station.description, readings: fetch_station_for_date(station, date)}
+    end
+    response
+  end
+
+  def today
+    today = Time.now
+    Time.new(today.year, today.month, today.day)
+  end
+
   get "/" do
     @message = "Weather"
+    @stations = fetch_for_date(today)
     haml :index
   end
 
   get "/stations/:model" do |model|
     content_type :json
-    today = Time.now
     station = Station.find_by(model:model)
-    readings = fetch_station_for_date(station, Time.new(today.year, today.month, today.day))
+    readings = fetch_station_for_date(station, today)
     if readings
       readings.to_json
     else
@@ -95,13 +108,8 @@ class App < Sinatra::Base
 
   get "/:year/:month/:day" do |year, month, day|
     content_type :json
-    response = []
     date = Time.new(year.to_i, month.to_i, day.to_i)
-
-    Station.each do |station|
-      response << {id: station.id, name: station.description, readings: fetch_station_for_date(station, date)}
-    end
-    response.to_json
+    fetch_for_date(date).to_json
   end
 
   get "/save" do
