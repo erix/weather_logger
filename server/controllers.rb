@@ -133,4 +133,17 @@ class App < Sinatra::Base
       "Cannot create DB entry"
     end
   end
+
+  #Pusher endpoints
+  get "/pusher/send" do
+    puts "Pusher #{params}"
+    Pusher['arduino'].trigger(params[:event], :time => params[:time])
+  end
+
+
+  get "/pusher/auth" do
+    puts "Authenticate #{params}"
+    auth = Pusher[params[:channel_name]].authenticate(params[:socket_id], :user_id => "1234")
+    "#{params[:callback]}(#{auth.to_json})"
+  end
 end

@@ -5,6 +5,7 @@
     %li.datepick =@day
     %li
       %a.next.icons-right
+    %li.current
   #chart
     .loader
     #chart-container

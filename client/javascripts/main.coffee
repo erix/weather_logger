@@ -9,6 +9,7 @@ window.Weather = window.Weather || {
 
 class Weather.Events.Notifier
   constructor: ->
+    console.log "Notifier"
     _.extend(this, Backbone.Events)
     @pusher = new Pusher('aaf8a36f8f5c57b42051');
     @channel = @pusher.subscribe('weather')
@@ -31,6 +32,7 @@ class Weather.Collections.Stations extends Backbone.Collection
   model: Weather.Models.Station
 
   initialize:->
+    console.log "Stations"
     Weather.Globals.notifier = Weather.Globals.notifier || new Weather.Events.Notifier
     @notifier = Weather.Globals.notifier
     @notifier.on "notifier:data", @newData, this
@@ -38,9 +40,10 @@ class Weather.Collections.Stations extends Backbone.Collection
     @_setDate(date)
 
   newData: (data) ->
-    station = @get(data.message.station_id)
-    station.get("readings").push data.message
-    @trigger "append", data.message
+    if @_isToday
+      station = @get(data.message.station_id)
+      station.get("readings").push data.message
+      @trigger "append", data.message
 
   setDate: (date) ->
     @_setDate(date)
@@ -50,6 +53,13 @@ class Weather.Collections.Stations extends Backbone.Collection
 
   _setDate: (date)->
     [@year, @month, @day] = [date.getFullYear(), date.getMonth()+1, date.getDate()]
+
+  _isToday: ->
+    today = new Date
+    currentDate = @currentDate()
+    currentDate.getFullYear() is today.getFullYear() and
+      currentDate.getMonth is today.getMonth() and
+      currentDate.getDate() is today.getDate()
 
   currentDate: ->
     new Date(@year, @month - 1, @day)
@@ -74,6 +84,8 @@ class Weather.Views.Chart extends Backbone.View
     @collection.on "reset", @render, this
     @collection.on "append", @appendPoint, this
 
+    @current_view = new Weather.Views.Current
+
     Highcharts.setOptions
       global:
         useUTC: false
@@ -89,6 +101,7 @@ class Weather.Views.Chart extends Backbone.View
     @$('.loader').hide()
     date = @collection.currentDate()
     @$el.html(@template({day: date.toLocaleDateString()}))
+    @$('.current').html @current_view.render().el
 
     @_renderDatePicker(date)
     @_renderChart()
@@ -125,7 +138,7 @@ class Weather.Views.Chart extends Backbone.View
       yAxis: [
         {
           title:
-            text: 'Tempearture (C)'
+            text: 'Temperature (C)'
           min: -20
           max: 30
         },
@@ -161,6 +174,24 @@ class Weather.Views.Chart extends Backbone.View
     series
 
 
+class Weather.Views.Current extends Backbone.View
+  template: JST['current']
+
+  initialize: ->
+    Weather.Globals.notifier = Weather.Globals.notifier || new Weather.Events.Notifier
+    @notifier = Weather.Globals.notifier
+    @notifier.on "notifier:data", @newData, this
+    @data = 10
+
+  newData: (data)->
+    console.log data
+    # @current = data.message
+
+  render: ->
+    console.log "Rendering #{@data}"
+    html = @template({current: @data})
+    @$el.html(html)
+    this
 
 class Weather.Routers.Router extends Backbone.Router
   routes:

@@ -13,6 +13,7 @@ ul.navigation {
   list-style: none;
   cursor: pointer;
   overflow: hidden;
+  display: inline-block;
 
   .datepick {
     font-size: 26px;
@@ -25,10 +26,14 @@ ul.navigation {
   }
 
   .prev, .next {
-    display: block;
+    display: inline-block;
     height: $icon-height;
     width: $icon-width;
   }
+}
+
+.current {
+  display: inline-block;
 }
 
 #chart {
