@@ -3,3 +3,4 @@
 .env
 client/public/.compiled
 spec/.compiled
+log

@@ -5,8 +5,10 @@ window.Weather = window.Weather || {
   Routers: {}
   Events: {}
   Globals: {}
+  init: ->
+    new Weather.Routers.Router
+    Backbone.history.start()
 }
 
 $ ->
-  new Weather.Routers.Router
-  Backbone.history.start()
+  window.Weather.init()
