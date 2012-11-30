@@ -1,6 +1,5 @@
 class Weather.Views.Chart extends Backbone.View
-  el: 'body'
-  template: JST['main']
+  template: 'chart'
 
   events:
     "click .next": "nextDate"
@@ -10,11 +9,15 @@ class Weather.Views.Chart extends Backbone.View
     @collection.on "reset", @render, this
     @collection.on "append", @appendPoint, this
 
-    @current_view = new Weather.Views.Current
+    # @current_view = new Weather.Views.Current
 
     Highcharts.setOptions
       global:
         useUTC: false
+
+  serialize: ->
+    date = @collection.currentDate()
+    day: date.toLocaleDateString()
 
   appendPoint: (data) ->
     if @chart
@@ -23,20 +26,17 @@ class Weather.Views.Chart extends Backbone.View
       @chart.get("#{data.station_id}hum").addPoint([date.getTime(), data.hum], false)
       @chart.redraw()
 
-  render: ->
+  beforeRender: ->
     @$('.loader').hide()
-    date = @collection.currentDate()
-    @$el.html(@template({day: date.toLocaleDateString()}))
-    @$('.current').html @current_view.render().el
+    # @$('.current').html @current_view.render().el
 
-    @_renderDatePicker(date)
+  afterRender: ->
+    @_renderDatePicker @collection.currentDate()
     @_renderChart()
-
 
   nextDate: ->
     @$('.loader').show()
     @collection.nextDate()
-
 
   prevDate: ->
     @$('.loader').show()
@@ -99,6 +99,8 @@ class Weather.Views.Chart extends Backbone.View
       series.push {id: "#{station.id}hum", name: "#{name} Humidity",data:humSeries, yAxis:1}
     series
 
+  cleanup: ->
+    @collection.off null, null, this
 
 class Weather.Views.Current extends Backbone.View
   template: JST['current']

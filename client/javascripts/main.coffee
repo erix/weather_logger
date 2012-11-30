@@ -1,3 +1,13 @@
+Backbone.LayoutManager.configure(
+  manage: true
+
+  fetch: (name)->
+    return window.JST[name]
+
+  render: (template, context) ->
+    return template(context);
+)
+
 window.Weather = window.Weather || {
   Collections: {}
   Models: {}

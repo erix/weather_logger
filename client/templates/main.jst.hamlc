@@ -1,11 +1,2 @@
-.container
-  %ul.navigation
-    %li
-      %a.prev.icons-left
-    %li.datepick =@day
-    %li
-      %a.next.icons-right
-    %li.current
-  #chart
-    .loader
-    #chart-container
+%header Something
+.content
