@@ -16,6 +16,23 @@ class Reading
   belongs_to :station
 end
 
+class DataStream
+  include Mongoid::Document
+
+  field :name
+  field :description
+
+  embeds_many :values
+end
+
+class Value
+  include Mongoid::Document
+  embedded_in :datastream
+
+  field :value
+  field :created_at, type: Time, default: ->{ Time.now }
+end
+
 class App < Sinatra::Base
 
   def valid?(message)
@@ -72,15 +89,29 @@ class App < Sinatra::Base
     response
   end
 
-  def today
-    today = Time.now
-    Time.new(today.year, today.month, today.day)
-  end
-
   get "/" do
     @message = "Weather"
     @stations = fetch_for_date(today)
     haml :index
+  end
+
+  post "/streams" do
+    # can post multiple streams at once
+    request.body.each_line do |line|
+      key, value = line.chomp.split ","
+      stream = DataStream.find_or_create_by(name: key)
+      stream.values << Value.new(value: value)
+    end
+  end
+
+  get "/streams/:name" do |name|
+    content_type :json
+    stream = DataStream.find_by(name: name)
+    if stream
+      stream.to_json
+    else
+      status 404
+    end
   end
 
   get "/stations/:model" do |model|

@@ -17,4 +17,10 @@ class App < Sinatra::Base
       halt status, headers.merge({'Content-Type' => 'application/json'}), body
     end
   end
+
+  def today
+    today = Time.now
+    Time.new(today.year, today.month, today.day)
+  end
+
 end
