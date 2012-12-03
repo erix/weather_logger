@@ -3,6 +3,7 @@ require 'sinatra/contrib'
 require 'json'
 require "mongoid"
 require 'pusher'
+require 'rabl'
 
 %w[lib server].each do |dir|
   Dir.glob("./#{dir}/*.rb").each do |relative_path|
@@ -19,6 +20,11 @@ set :sprockets, SprocketsEnvironmentBuilder.build(ENV['RACK_ENV'] || 'developmen
 
 Mongoid.load!("config/mongoid.yml")
 
+Rabl.configure do |config|
+  config.include_json_root = false
+  config.include_child_root = false
+end
+
 configure :production do
   require 'newrelic_rpm'
   # Ensure the agent is started using Unicorn
@@ -28,6 +34,7 @@ configure :production do
 end
 
 class App < Sinatra::Base
+  Rabl.register!
   register Sinatra::Contrib
   set :root, File.expand_path(".")
   set :public_folder, Proc.new { File.join(root, "client/public") }

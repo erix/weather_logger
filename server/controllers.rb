@@ -105,10 +105,9 @@ class App < Sinatra::Base
   end
 
   get "/streams/:name" do |name|
-    content_type :json
-    stream = DataStream.find_by(name: name)
-    if stream
-      stream.to_json
+    @stream = DataStream.find_by(name: name)
+    if @stream
+      render :rabl, :stream, :format => :json
     else
       status 404
     end

@@ -114,8 +114,8 @@ END
 
     it "should not return data for non existent stream" do
       get "/streams/invalid" do
-        # puts last_response
-        last_response.status.should equal(404)
+        # puts last_response.body
+        last_response.status.should == 404
       end
     end
 
@@ -129,6 +129,7 @@ END
 
       get "/streams/#{data_stream}" do
         last_response.should be_ok
+        # puts last_response.body
         last_response.body.should be_json_eql(expected).excluding(:_id, :created_at, :description)
       end
     end
