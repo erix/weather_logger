@@ -76,18 +76,28 @@ END
       last_response.should be_ok
     end
 
-    it "can post multiple streams at once" do
+    it "should post multiple streams at once" do
       post "/streams", "power,1234\ntemp,12\nhum,34"
       last_response.should be_ok
     end
 
-    it "saves posted data to DB" do
+    it "should create new stream to DB" do
       data_stream = "power"
       post "/streams", "#{data_stream},1234"
       DataStream.find_by(name: data_stream).should_not be_nil
     end
 
-    it "saves multiple posted data to DB" do
+    it "should add new value to an existing stream" do
+      data_stream = "power"
+      stream = DataStream.create(name: data_stream)
+      stream.values << Value.new(value: "4567")
+
+      post "/streams", "#{data_stream},1234"
+      stream = DataStream.find_by(name: data_stream)
+      stream.values.size.should == 2
+    end
+
+    it "should create multiple streams to DB" do
       data_stream1 = "power"
       value1 = "1234"
       data_stream2 = "temp"
@@ -104,7 +114,7 @@ END
       stream2.values.first.value.should == value2
     end
 
-    it "returns the requested data stream" do
+    it "should return the requested data stream" do
       data_stream = "power"
       DataStream.create(name: data_stream)
       get "/streams/#{data_stream}" do
