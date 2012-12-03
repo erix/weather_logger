@@ -3,7 +3,7 @@ class Weather.Collections.Stations extends Backbone.Collection
 
   initialize:->
     console.log "Stations"
-    Weather.Globals.notifier = Weather.Globals.notifier || new Weather.Events.Notifier
+    Weather.Globals.notifier ?= new Weather.Events.Notifier
     @notifier = Weather.Globals.notifier
     @notifier.on "notifier:data", @newData, this
     date = new Date

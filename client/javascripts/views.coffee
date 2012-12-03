@@ -103,7 +103,7 @@ class Weather.Views.Chart extends Backbone.View
     @collection.off null, null, this
 
 class Weather.Views.Current extends Backbone.View
-  template: JST['current']
+  template: 'current'
 
   initialize: ->
     Weather.Globals.notifier = Weather.Globals.notifier || new Weather.Events.Notifier
@@ -121,4 +121,49 @@ class Weather.Views.Current extends Backbone.View
     @$el.html(html)
     this
 
+class Weather.Views.ACSettings extends Backbone.View
+  template: 'ac_settings'
+
+  events:
+    'click .btn.on': 'on'
+    'click .btn.off': 'off'
+
+  initialize: ->
+    console.log "AC settings"
+    # Pusher.channel_auth_transport = 'jsonp'
+    # Pusher.channel_auth_endpoint = 'http://weather-logger.dev/pusher/auth'
+    # @pusher = new Pusher('aaf8a36f8f5c57b42051')
+    # # @channel = @pusher.subscribe("arduino")
+    # @presence = @pusher.subscribe("presence-arduino")
+
+    # @presence.bind 'pusher:subscription_succeeded', (members)->
+    #   console.log members.count
+    #   members.each (member)->
+    #     console.log member
+
+    # @presence.bind 'pusher:subscription_error', ->
+    #   console.log 'Subsrciption Error'
+  serialize: ->
+    test: "test"
+
+  _sendPusher: (data) ->
+    $.ajax
+      url: "http://weather-logger.dev/pusher/send"
+      data: data
+      crossDomain: true
+      dataType: 'jsonp'
+      type: 'POST'
+
+  _getTime: ->
+    timeStr = $("input#time").val()
+    [hour, sec] = timeStr.split(':')
+    parseInt(hour) * 3600 + parseInt(sec) * 60
+
+  on: ->
+    # @channel.trigger("client-led-on")
+    @_sendPusher(event:'on', time:@_getTime())
+
+  off: ->
+    # @channel.trigger("client-led-off")
+    @_sendPusher(event:'off', time:'Test')
 
