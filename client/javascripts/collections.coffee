@@ -40,5 +40,5 @@ class Weather.Collections.Stations extends Backbone.Collection
   prevDate: ->
     @setDate(new Date(@year, @month-1, @day-1))
 
-
-
+class Weather.Collections.Streams extends Backbone.Collection
+  url: "/streams"

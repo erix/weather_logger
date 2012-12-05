@@ -97,14 +97,28 @@ class App < Sinatra::Base
 
   post "/streams" do
     # can post multiple streams at once
-    request.body.each_line do |line|
-      key, value = line.chomp.split ","
-      stream = DataStream.find_or_create_by(name: key)
-      stream.values << Value.new(value: value)
+    # raw = request.env["rack.input"].read
+    # puts raw
+    request.body.each do |line|
+      line = line.chomp
+      unless line.blank?
+        key, value = line.chomp.split ","
+        stream = DataStream.find_or_create_by(name: key)
+        stream.values << Value.new(value: value)
+      end
     end
   end
 
+  get "/streams" do
+    puts "Get streams"
+    content_type :json
+    @streams = DataStream.all
+    puts @streams.to_a
+    render :rabl, :streams, :format => :json
+  end
+
   get "/streams/:name" do |name|
+    content_type :json
     @stream = DataStream.find_by(name: name)
     if @stream
       render :rabl, :stream, :format => :json

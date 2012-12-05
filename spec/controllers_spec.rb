@@ -129,6 +129,17 @@ END
       end
     end
 
+    it "should return all available streams" do
+      stream1 = "stream1"
+      stream2 = "stream2"
+      DataStream.create(name: stream1, description: "test")
+      DataStream.create(name: stream2, description: "test")
+
+      get "/streams" do
+        last_response.body.should be_json_eql(%([{"name":"#{stream1}", "description":"test"}, {"name":"#{stream2}", "description":"test"}]))
+      end
+    end
+
     it "should return values for the requested stream" do
       data_stream = "power"
       value1 = "345"

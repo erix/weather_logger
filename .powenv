@@ -1,5 +1,0 @@
-#export RACK_ENV=production
-export MONGOLAB_URI=mongodb://heroku_app8190573:v2h1usmecdnmj771hco0re6001@ds037977.mongolab.com:37977/heroku_app8190573
-export PUSHER_ID=29447
-export PUSHER_SECRET=8e4b6a27990c01fc8522
-export PUSHER_KEY=aaf8a36f8f5c57b42051

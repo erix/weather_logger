@@ -4,3 +4,4 @@
 client/public/.compiled
 spec/.compiled
 log
+.powenv
