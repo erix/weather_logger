@@ -3,6 +3,7 @@ class Weather.Routers.Router extends Backbone.Router
     "": "redirectToToday"
     ":year/:month/:day": 'showChart'
     "acsettings": 'showACSettings'
+    "streams" : 'showStreams'
 
   initialize: ->
     @main = new Backbone.Layout
@@ -28,3 +29,5 @@ class Weather.Routers.Router extends Backbone.Router
   showACSettings: ->
     @main.setView(".content", new Weather.Views.ACSettings).render()
 
+  showStreams: ->
+    @main.setView(".content", new Weather.Views.StreamsView).render()

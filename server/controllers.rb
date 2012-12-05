@@ -1,38 +1,3 @@
-class Station
-  include Mongoid::Document
-
-  field :model
-  field :description
-  has_many :readings
-end
-
-class Reading
-  include Mongoid::Document
-
-  field :temp, type: Float
-  field :hum, type: Integer
-  field :created_at, type: Time, default: ->{ Time.now }
-
-  belongs_to :station
-end
-
-class DataStream
-  include Mongoid::Document
-
-  field :name
-  field :description
-
-  embeds_many :values
-end
-
-class Value
-  include Mongoid::Document
-  embedded_in :datastream
-
-  field :value
-  field :created_at, type: Time, default: ->{ Time.now }
-end
-
 class App < Sinatra::Base
 
   def valid?(message)
@@ -110,16 +75,14 @@ class App < Sinatra::Base
   end
 
   get "/streams" do
-    puts "Get streams"
     content_type :json
     @streams = DataStream.all
-    puts @streams.to_a
     render :rabl, :streams, :format => :json
   end
 
-  get "/streams/:name" do |name|
+  get "/streams/:id" do |id|
     content_type :json
-    @stream = DataStream.find_by(name: name)
+    @stream = DataStream.find(id)
     if @stream
       render :rabl, :stream, :format => :json
     else

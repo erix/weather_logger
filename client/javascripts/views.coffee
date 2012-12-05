@@ -11,10 +11,6 @@ class Weather.Views.Chart extends Backbone.View
 
     # @current_view = new Weather.Views.Current
 
-    Highcharts.setOptions
-      global:
-        useUTC: false
-
   serialize: ->
     date = @collection.currentDate()
     day: date.toLocaleDateString()
@@ -101,6 +97,7 @@ class Weather.Views.Chart extends Backbone.View
 
   cleanup: ->
     @collection.off null, null, this
+    @chart.destroy() if @chart
 
 class Weather.Views.Current extends Backbone.View
   template: 'current'
@@ -167,3 +164,75 @@ class Weather.Views.ACSettings extends Backbone.View
     # @channel.trigger("client-led-off")
     @_sendPusher(event:'off', time:'Test')
 
+class Weather.Views.StreamsView extends Backbone.View
+  tagName: 'ul'
+
+  initialize: ->
+    console.log "Streams view"
+    @collection = new Weather.Collections.Streams
+    @collection.fetch()
+    @collection.on "reset", @reset, this
+
+  beforeRender: ->
+    @collection.each (model)=>
+      @insertView new Weather.Views.StreamView(model: model)
+
+  reset: ->
+    console.log "Collection reloaded"
+    @render()
+
+class Weather.Views.StreamView extends Backbone.View
+  template: 'stream'
+  tagName: 'li'
+
+  initialize: ->
+    console.log "Stream view"
+    @model.fetch()
+    @model.on "change", @_addChartSeries, this
+
+  cleanup: ->
+    @model.off null, null, this
+    @chart.destroy() if @chart
+
+  _addChartSeries: ->
+    values = _.pluck(@model.get("values"), "value")
+    dates = for dateString in _.pluck(@model.get("values"), "created_at")
+      date = new Date(dateString)
+      date.getTime()
+
+    series = for i in [0...dates.length]
+      a[i] for a in [dates, values]
+
+    @chart.hideLoading()
+    @chart.addSeries
+      name: @model.get("name")
+      data: series
+      type: if @model.get("name") is "Wh" then "bar" else "spline"
+
+      # pointInterval: 24 * 3600 * 1000
+
+  serialize: ->
+    name: @model.get("description")
+
+  afterRender: ->
+    @chart.destroy() if @chart
+    @chart = new Highcharts.Chart
+      chart:
+        renderTo: @$('.chart')[0]
+      credits:
+        enabled: false
+      title:
+        text: @model.get("description")
+      xAxis:
+        type: 'datetime'
+      yAxis:
+        title:
+          text: ''
+      plotOptions:
+        series:
+          marker:
+            enabled: false
+      legend:
+        enabled: false
+
+    @chart.showLoading()

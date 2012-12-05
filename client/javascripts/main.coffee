@@ -20,5 +20,9 @@ window.Weather = window.Weather || {
     Backbone.history.start()
 }
 
+Highcharts.setOptions
+      global:
+        useUTC: false
+
 $ ->
   window.Weather.init()

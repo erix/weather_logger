@@ -115,9 +115,8 @@ END
     end
 
     it "should return the requested data stream" do
-      data_stream = "power"
-      DataStream.create(name: data_stream)
-      get "/streams/#{data_stream}" do
+      stream = DataStream.create(name: "power")
+      get "/streams/#{stream.id}" do
         last_response.should be_ok
       end
     end
@@ -143,12 +142,12 @@ END
     it "should return values for the requested stream" do
       data_stream = "power"
       value1 = "345"
-      value2 = "745"
+      value2 = "7.45"
       stream = DataStream.create(name: data_stream)
       stream.values << Value.new(value: value1) << Value.new(value: value2)
-      expected = %({"name":"#{data_stream}", "values":[{"value":"#{value1}"}, {"value": "#{value2}"}]})
+      expected = %({"name":"#{data_stream}", "values":[{"value":#{value1}}, {"value": #{value2}}]})
 
-      get "/streams/#{data_stream}" do
+      get "/streams/#{stream.id}" do
         last_response.should be_ok
         # puts last_response.body
         last_response.body.should be_json_eql(expected).excluding(:_id, :created_at, :description)
