@@ -42,3 +42,4 @@ class Weather.Collections.Stations extends Backbone.Collection
 
 class Weather.Collections.Streams extends Backbone.Collection
   url: "/streams"
+  model: Weather.Models.Stream

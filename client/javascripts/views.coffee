@@ -189,10 +189,20 @@ class Weather.Views.StreamView extends Backbone.View
     console.log "Stream view"
     @model.fetch()
     @model.on "change", @_addChartSeries, this
+    @model.on "change:values", @_addNewValue, this
 
   cleanup: ->
     @model.off null, null, this
     @chart.destroy() if @chart
+
+  _addNewValue: (data)->
+    console.log data
+    date = new Date(data.created_at)
+    series = @chart.get(@model.get("name"))
+    if series
+      series.addPoint([date.getTime(), data.value], false)
+      @chart.redraw()
+
 
   _addChartSeries: ->
     values = _.pluck(@model.get("values"), "value")
@@ -205,6 +215,7 @@ class Weather.Views.StreamView extends Backbone.View
 
     @chart.hideLoading()
     @chart.addSeries
+      id: @model.get("name")
       name: @model.get("name")
       data: series
       type: if @model.get("name") is "Wh" then "bar" else "spline"

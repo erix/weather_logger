@@ -7,4 +7,5 @@ class Weather.Events.Notifier
     @channel.bind "reading", (data)=>
       @trigger "notifier:data", data
 
+window.Weather.Globals.notifier = new Weather.Events.Notifier
 

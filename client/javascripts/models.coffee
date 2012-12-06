@@ -10,5 +10,13 @@ class Weather.Models.Station extends Backbone.Model
   getHumidities: ->
       _.pluck(@get("readings"),"hum")
 
+class Weather.Models.Stream extends Backbone.Model
+  initialize: ->
+    Weather.Globals.notifier.channel.bind "stream:#{@get("name")}", @newData
+
+  newData: (data)=>
+    @get("values").push data
+    @trigger "change:values", data
+
 
 

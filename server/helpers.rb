@@ -23,4 +23,12 @@ class App < Sinatra::Base
     Time.new(today.year, today.month, today.day)
   end
 
+  def toNumber(value)
+    if value.index('.')
+      value.to_f
+    else
+      value.to_i
+    end
+  end
+
 end

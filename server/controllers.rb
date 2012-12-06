@@ -69,7 +69,11 @@ class App < Sinatra::Base
       unless line.blank?
         key, value = line.chomp.split ","
         stream = DataStream.find_or_create_by(name: key)
-        stream.values << Value.new(value: value)
+        dbValue = Value.new(value: value)
+        stream.values << dbValue
+
+        # real-time announcement
+        Pusher['weather'].trigger("stream:#{key}", {:value => toNumber(dbValue.value), :created_at => dbValue.created_at}) unless settings.environment == :test
       end
     end
   end
