@@ -222,6 +222,7 @@ class Weather.Views.ChartView extends Backbone.View
       type: if model.get("name") is "Wh" then "bar" else "spline"
       pointWidth: 40 if model.get("name") is "Wh"
       yAxis: 1 if model.get("name") in ["temp", "temp2"]
+      zIndex: if model.get("name") is "Wh" then 0 else 1
 
         # pointInterval: 24 * 3600 * 1000
 
