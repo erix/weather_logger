@@ -30,14 +30,16 @@ task :seed do
 end
 
 namespace :db do
-  desc 'Clears DB values'
+  desc 'Clears invalid DB values'
   task :clear do
     require './server/application.rb'
-    puts DataStream.all.to_a.inspect
-    DataStream.all.each do |stream|
-      puts "Clearing #{stream.name}"
-      stream.values.where(:created_at.lt => Time.now - 24*2600).each {|v| v.delete} if stream != "Wh"
+    Value.each do |v|
+      v.delete if v.data_stream_id == nil
     end
+    # DataStream.all.each do |stream|
+    #   puts "Clearing #{stream.name}"
+    #   stream.values.where(:created_at.lt => Time.now - 24*2600).each {|v| v.delete} if stream != "Wh"
+    # end
   end
 end
 

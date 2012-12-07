@@ -4,6 +4,13 @@ require 'json'
 require "mongoid"
 require 'pusher'
 require 'rabl'
+require "pp"
+
+# File.readlines(".env").each do |line|
+#   key, value = line.split("=")
+#   ENV[key] = value
+# end
+
 
 %w[lib server].each do |dir|
   Dir.glob("./#{dir}/*.rb").each do |relative_path|
@@ -18,7 +25,7 @@ Pusher.secret = ENV['PUSHER_SECRET']
 
 set :sprockets, SprocketsEnvironmentBuilder.build(ENV['RACK_ENV'] || 'development')
 
-Mongoid.load!("config/mongoid.yml")
+Mongoid.load!("./config/mongoid.yml")
 
 Rabl.configure do |config|
   config.include_json_root = false

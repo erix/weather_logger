@@ -1,70 +1,4 @@
 class App < Sinatra::Base
-
-  def valid?(message)
-    a = message.scan(/../)
-    checksum = a[8].hex
-
-    sum = 0
-    message[0..-5].each_char {|c| sum = sum + c.hex}
-    ((sum - 10) & 0xFF) == checksum
-  end
-
-  #parses OSV2 report
-  #http://www.mattlary.com/2012/06/23/weather-station-project/
-  def parseReport(report)
-    # 0: model
-    # 1: sign
-    # 2: tens
-    # 3: ones
-    # 4: tenths
-    # 5: humidity one
-    # 6: humidity tens
-
-    return nil if not valid?(report)
-
-    a = report.unpack('a4@13h@10hh@8h@12h@15h')
-    sign = a[1].eql?("0") ? "+" : "-"
-
-    parsed = {
-      station: a[0].downcase,
-      reading: {
-        temp: "%s%s%s.%s" % [sign, a[2..4]].flatten,
-        hum: "#{a[6]}#{a[5]}".to_i
-      }
-    }
-
-    return parsed
-  end
-
-  def fetch_station_for_date(station, date)
-    if station
-      range = Range.new(date, date + 86400) #range is +1 day
-      readings = station.readings.where(created_at: range)
-      readings
-    else
-      nil
-    end
-  end
-
-  def fetch_for_date(date)
-    response = []
-    Station.each do |station|
-      response << {id: station.id, name: station.description, readings: fetch_station_for_date(station, date)}
-    end
-    response
-  end
-
-  def parse_streams(stream_str, &block)
-    stream_str.each do |line|
-      line = line.chomp
-      unless line.blank?
-        key, value = line.chomp.split ","
-        yield key, value
-      end
-    end
-    
-  end
-
   get "/" do
     @message = "Weather"
     @stations = fetch_for_date(today)
@@ -94,7 +28,7 @@ class App < Sinatra::Base
     # @stream = DataStream.where(:values => {:created_at.gt => Time.now - 3600}).find(id)
     @stream = DataStream.find(id)
     if @stream
-      @stream.values = @stream.values.where(:created_at.gt => Time.now - (24 * 3600))
+      pp @stream.values = @stream.values.where(:created_at.gt => Time.now - (24 * 3600))
       render :rabl, :stream, :format => :json
     else
       status 404

@@ -165,67 +165,90 @@ class Weather.Views.ACSettings extends Backbone.View
     @_sendPusher(event:'off', time:'Test')
 
 class Weather.Views.StreamsView extends Backbone.View
-  tagName: 'ul'
 
   initialize: ->
-    console.log "Streams view"
     @collection = new Weather.Collections.Streams
     @collection.fetch()
-    @collection.on "reset", @reset, this
+    @collection.on "reset", @_createViews, this
+    @views = []
 
-  beforeRender: ->
-    @collection.each (model)=>
-      @insertView new Weather.Views.StreamView(model: model)
+  _createViews: ->
+    models = @collection.filter (model)->
+      return model.get("name") in ["Wh", "temp", "temp2"]
+    @views.push new Weather.Views.ChartView(models: models)
 
-  reset: ->
-    console.log "Collection reloaded"
+    models = @collection.filter (model)->
+      return model.get("name") in ["power"]
+    @views.push new Weather.Views.ChartView(models: models)
     @render()
 
-class Weather.Views.StreamView extends Backbone.View
-  template: 'stream'
-  tagName: 'li'
+  beforeRender: ->
+    _.each @views, (view)=>
+      @insertView(view)
 
-  initialize: ->
-    console.log "Stream view"
-    @model.fetch()
-    @model.on "change", @_addChartSeries, this
-    @model.on "change:values", @_addNewValue, this
+class Weather.Views.ChartView extends Backbone.View
+  template: 'stream'
+
+  initialize: (options)->
+    @models = options.models
+    @_reloadModels()
+
+  _reloadModels: ->
+    @chart.showLoading() if @chart
+    _.each @models, (model)=>
+      model.fetch()
+      model.on "change", @_addChartSeries, this
+      model.on "change:value", @_addNewValue, this
 
   cleanup: ->
-    @model.off null, null, this
+    _.each @models, (model)=>
+      model.off null, null, this
     @chart.destroy() if @chart
 
-  _addNewValue: (data)->
-    console.log data
+  _addNewValue: (data, model)->
+    console.log "Data received for #{model.get("name")}"
     date = new Date(data.created_at)
-    series = @chart.get(@model.get("name"))
+    series = @chart.get(model.get("name"))
     if series
       series.addPoint([date.getTime(), data.value], false)
       @chart.redraw()
 
-
-  _addChartSeries: ->
-    values = _.pluck(@model.get("values"), "value")
-    dates = for dateString in _.pluck(@model.get("values"), "created_at")
-      date = new Date(dateString)
-      date.getTime()
-
-    series = for i in [0...dates.length]
-      a[i] for a in [dates, values]
-
+  _addChartSeries: (model)->
     @chart.hideLoading()
     @chart.addSeries
-      id: @model.get("name")
-      name: @model.get("name")
-      data: series
-      type: if @model.get("name") is "Wh" then "bar" else "spline"
+      id: model.get("name")
+      name: model.get("name")
+      data: model.getSeriesData()
+      type: if model.get("name") is "Wh" then "bar" else "spline"
+      pointWidth: 40 if model.get("name") is "Wh"
+      yAxis: 1 if model.get("name") in ["temp", "temp2"]
 
-      # pointInterval: 24 * 3600 * 1000
+        # pointInterval: 24 * 3600 * 1000
 
-  serialize: ->
-    name: @model.get("description")
+  _getYAxis: ->
+    axis = []
+    axis.push
+      title:
+        text: "Watts"
+
+    if @models.length > 1
+      axis.push
+        title:
+          text: "Temperature"
+        min: -30
+        max: 30
+        opposite: true
+    return axis
+
+  _getTitle: ->
+    if @models.length > 1
+      return "Temperatures and Power Consumption"
+    else
+      return "Current Power Consumption"
+
 
   afterRender: ->
+    console.log "Create chart"
     @chart.destroy() if @chart
     @chart = new Highcharts.Chart
       chart:
@@ -233,17 +256,15 @@ class Weather.Views.StreamView extends Backbone.View
       credits:
         enabled: false
       title:
-        text: @model.get("description")
+        text: @_getTitle()
       xAxis:
         type: 'datetime'
-      yAxis:
-        title:
-          text: ''
       plotOptions:
         series:
           marker:
             enabled: false
       legend:
         enabled: false
+      yAxis: @_getYAxis()
 
     @chart.showLoading()
