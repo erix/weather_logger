@@ -174,11 +174,11 @@ class Weather.Views.StreamsView extends Backbone.View
 
   _createViews: ->
     models = @collection.filter (model)->
-      return model.get("name") in ["Wh", "temp", "temp2"]
+      model.get("name") in ["power"]
     @views.push new Weather.Views.ChartView(models: models)
 
     models = @collection.filter (model)->
-      return model.get("name") in ["power"]
+      model.get("name") in ["Wh", "temp", "temp2"]
     @views.push new Weather.Views.ChartView(models: models)
     @render()
 
