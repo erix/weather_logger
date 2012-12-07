@@ -153,5 +153,43 @@ END
         last_response.body.should be_json_eql(expected).excluding(:_id, :created_at, :description)
       end
     end
+
+    it "should return only 1 day old data" do
+      data_stream = "test"
+      value1 = "345"
+      value2 = "7.45"
+      stream = DataStream.create(name: data_stream)
+      stream.values << Value.new(value: value1, created_at: Time.now - (24 * 3600 - 10)) << Value.new(value: value2)
+      expected = %({"name":"#{data_stream}", "values":[{"value": #{value2}}]})
+
+      get "/streams/#{stream.id}" do
+        last_response.should be_ok
+        puts last_response.body
+        last_response.body.should be_json_eql(expected).excluding(:_id, :created_at, :description)
+      end
+
+    end
+
+    it "should delete old entries after receiving a new" do
+      validity = 7200
+      data_stream = "power"
+      stream = DataStream.create(name: data_stream)
+      stream.values << Value.new(value: "12", created_at: Time.now - (validity + 1))
+      post "/streams", "#{data_stream},1234"
+      last_response.should be_ok
+      stream = DataStream.find_by(name: data_stream)
+      stream.values.size.should == 1
+    end
+
+    it "should not delete old entries for not power streams" do
+      validity = 7200
+      data_stream = "test"
+      stream = DataStream.create(name: data_stream)
+      stream.values << Value.new(value: "12", created_at: Time.now - (validity + 1))
+      post "/streams", "#{data_stream},1234"
+      last_response.should be_ok
+      stream = DataStream.find_by(name: data_stream)
+      stream.values.size.should == 2
+    end
   end
 end

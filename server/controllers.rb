@@ -54,6 +54,17 @@ class App < Sinatra::Base
     response
   end
 
+  def parse_streams(stream_str, &block)
+    stream_str.each do |line|
+      line = line.chomp
+      unless line.blank?
+        key, value = line.chomp.split ","
+        yield key, value
+      end
+    end
+    
+  end
+
   get "/" do
     @message = "Weather"
     @stations = fetch_for_date(today)
@@ -64,17 +75,11 @@ class App < Sinatra::Base
     # can post multiple streams at once
     # raw = request.env["rack.input"].read
     # puts raw
-    request.body.each do |line|
-      line = line.chomp
-      unless line.blank?
-        key, value = line.chomp.split ","
-        stream = DataStream.find_or_create_by(name: key)
-        dbValue = Value.new(value: value)
-        stream.values << dbValue
-
-        # real-time announcement
-        Pusher['weather'].trigger("stream:#{key}", {:value => toNumber(dbValue.value), :created_at => dbValue.created_at}) unless settings.environment == :test
-      end
+    parse_streams(request.body) do |key, value|
+      stream = DataStream.find_or_create_by(name: key)
+      dbValue = Value.new(value: value)
+      stream.values << dbValue
+      Pusher['weather'].trigger("stream:#{key}", {:value => toNumber(dbValue.value), :created_at => dbValue.created_at}) unless settings.environment == :test
     end
   end
 
@@ -86,8 +91,10 @@ class App < Sinatra::Base
 
   get "/streams/:id" do |id|
     content_type :json
+    # @stream = DataStream.where(:values => {:created_at.gt => Time.now - 3600}).find(id)
     @stream = DataStream.find(id)
     if @stream
+      @stream.values = @stream.values.where(:created_at.gt => Time.now - (24 * 3600))
       render :rabl, :stream, :format => :json
     else
       status 404
@@ -146,6 +153,12 @@ class App < Sinatra::Base
   end
 
   #Pusher endpoints
+  post "/pusher/streams" do
+    parse_streams(request.body) do |key, value|
+      Pusher['weather'].trigger("stream:#{key}", {:value => toNumber(value), :created_at => Time.now}) unless settings.environment == :test
+    end
+  end
+
   get "/pusher/send" do
     puts "Pusher #{params}"
     Pusher['arduino'].trigger(params[:event], :time => params[:time])

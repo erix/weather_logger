@@ -29,6 +29,18 @@ task :seed do
   Station.create(model:"1a3d", description:"Outside sensor")
 end
 
+namespace :db do
+  desc 'Clears DB values'
+  task :clear do
+    require './server/application.rb'
+    puts DataStream.all.to_a.inspect
+    DataStream.all.each do |stream|
+      puts "Clearing #{stream.name}"
+      stream.values.where(:created_at.lt => Time.now - 24*2600).each {|v| v.delete} if stream != "Wh"
+    end
+  end
+end
+
 namespace :assets do
   desc 'compile sprockets to static files for testing purposes'
 
