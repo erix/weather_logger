@@ -215,14 +215,15 @@ class Weather.Views.ChartView extends Backbone.View
 
   _addChartSeries: (model)->
     @chart.hideLoading()
+    name = model.get "name"
     @chart.addSeries
-      id: model.get("name")
-      name: model.get("name")
+      id: name
+      name: name
       data: model.getSeriesData()
-      type: if model.get("name") is "Wh" then "bar" else "spline"
-      pointWidth: 40 if model.get("name") is "Wh"
-      yAxis: 1 if model.get("name") in ["temp", "temp2"]
-      zIndex: if model.get("name") is "Wh" then 0 else 1
+      type: if name is "Wh" then "bar" else if name is "power" then "line" else "spline"
+      pointWidth: 40 if name is "Wh"
+      yAxis: 1 if name in ["temp", "temp2"]
+      zIndex: if name is "Wh" then 0 else 1
 
         # pointInterval: 24 * 3600 * 1000
 
