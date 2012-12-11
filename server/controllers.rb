@@ -23,12 +23,15 @@ class App < Sinatra::Base
     render :rabl, :streams, :format => :json
   end
 
+  # returns to stream values for the last 24 hours
   get "/streams/:id" do |id|
     content_type :json
     # @stream = DataStream.where(:values => {:created_at.gt => Time.now - 3600}).find(id)
     @stream = DataStream.find(id)
     if @stream
-      pp @stream.values = @stream.values.where(:created_at.gt => Time.now - (24 * 3600))
+      t = Time.now - (24 * 3600)
+      @values =  @stream.values.where(:created_at.gt => t).to_a
+      # pp @values.first
       render :rabl, :stream, :format => :json
     else
       status 404

@@ -159,12 +159,12 @@ END
       value1 = "345"
       value2 = "7.45"
       stream = DataStream.create(name: data_stream)
-      stream.values << Value.new(value: value1, created_at: Time.now - (24 * 3600 - 10)) << Value.new(value: value2)
+      stream.values << Value.new(value: value1, created_at: Time.now - (25 * 3600)) << Value.new(value: value2)
       expected = %({"name":"#{data_stream}", "values":[{"value": #{value2}}]})
 
       get "/streams/#{stream.id}" do
         last_response.should be_ok
-        puts last_response.body
+        # puts last_response.body
         last_response.body.should be_json_eql(expected).excluding(:_id, :created_at, :description)
       end
 
