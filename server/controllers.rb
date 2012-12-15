@@ -38,6 +38,17 @@ class App < Sinatra::Base
     end
   end
 
+  get "/streams/:id/:year/:month/:day" do |id, year, month, day|
+    content_type :json
+    date = Time.new(year.to_i, month.to_i, day.to_i)
+    @stream = DataStream.find(id)
+    if @stream
+      range = Range.new(date, date + 86400) #range is +1 day
+      @stream.values = @stream.values.where(created_at: range)
+      render :rabl, :stream, :format => :json
+    end
+  end
+
   get "/stations/:model" do |model|
     content_type :json
     station = Station.find_by(model:model)

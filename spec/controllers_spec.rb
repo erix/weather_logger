@@ -167,7 +167,21 @@ END
         # puts last_response.body
         last_response.body.should be_json_eql(expected).excluding(:_id, :created_at, :description)
       end
+    end
 
+    it "should return data for the given date" do
+      data_stream = "test"
+      value1 = "345"
+      value2 = "7.45"
+      stream = DataStream.create(name: data_stream)
+      stream.values << Value.new(value: value1, created_at: Time.new(2012,12,7)) << Value.new(value: value2)
+      expected = %({"name":"#{data_stream}", "values":[{"value": #{value2}}]})
+
+      get "/streams/#{stream.id}/2012/12/8" do
+        last_response.should be_ok
+        # puts last_response.body
+        last_response.body.should be_json_eql(expected).excluding(:_id, :created_at, :description)
+      end
     end
 
     it "should delete old entries after receiving a new" do
