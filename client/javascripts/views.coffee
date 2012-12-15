@@ -192,6 +192,10 @@ class Weather.Views.ChartView extends Backbone.View
   initialize: (options)->
     @models = options.models
     @_reloadModels()
+    # @currentViews = []
+    _.each(@models, (model)->
+      @insertView('.live-values', new Weather.Views.CurrentValueView(model: model)).render()
+    ,this)
 
   _reloadModels: ->
     @chart.showLoading() if @chart
@@ -270,3 +274,25 @@ class Weather.Views.ChartView extends Backbone.View
       yAxis: @_getYAxis()
 
     @chart.showLoading()
+
+  class Weather.Views.CurrentValueView extends Backbone.View
+    tagName: 'li'
+    template: 'current'
+
+    initialize: ->
+      @model.on "change", @render, this
+      @model.on "change:value", @render, this
+
+    cleanup: ->
+      @model.off null, null, this
+
+    serialize: ->
+      current = _.last(@model.get("values")).value if @model.get 'values'
+      {current: current || 0, unit: @_getUnit(@model.get("name"))}
+
+    _getUnit: (text)->
+      switch text
+        when "Wh" then "Wh"
+        when "temp" then "℃"
+        when "temp2" then "℃"
+        when "power" then "W"
