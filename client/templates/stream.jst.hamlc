@@ -1,2 +1,2 @@
-%ul.live-values
-.chart
+.chart.span10
+%ul.live-values.span2

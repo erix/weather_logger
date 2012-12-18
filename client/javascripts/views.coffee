@@ -188,6 +188,7 @@ class Weather.Views.StreamsView extends Backbone.View
 
 class Weather.Views.ChartView extends Backbone.View
   template: 'stream'
+  className: 'stream row'
 
   initialize: (options)->
     @models = options.models
@@ -225,7 +226,7 @@ class Weather.Views.ChartView extends Backbone.View
       name: name
       data: model.getSeriesData()
       type: if name is "Wh" then "bar" else if name is "power" then "line" else "spline"
-      pointWidth: 40 if name is "Wh"
+      pointWidth: 20 if name is "Wh"
       yAxis: 1 if name in ["temp", "temp2"]
       zIndex: if name is "Wh" then 0 else 1
 

@@ -6,7 +6,8 @@ $icon-height: icons-sprite-height(left);
 $icon-width: icons-sprite-width(left);
 
 body {
-  padding-top: 40px;
+  margin-top: 20px;
+  background-color: #e1e1e1;
 }
 
 ul.navigation {
@@ -32,22 +33,30 @@ ul.navigation {
   }
 }
 
-ul.live-values {
-  list-style: none;
+.stream {
+  position: relative;
+  margin-bottom: 40px;
 
-  li {
-    display: inline-block;
-    background-color: #e1e1e1;
-    border-radius: 5px;
-    font-size: 32px;
-    line-height: 32px;
-    margin: 5px;
-    padding: 25px;
+  ul.live-values {
+    // margin-top: 40px;
+    list-style: none;
+    // float: right;
+
+    li {
+      width: 180px;
+      background-color: white;
+      border-radius: 5px;
+      font-size: 32px;
+      line-height: 32px;
+      margin: 5px;
+      padding: 25px;
+      text-align: center;
+    }
   }
-}
 
-.current {
-  display: inline-block;
+  .chart {
+    // margin-right: 270px;
+  }
 }
 
 #chart {
