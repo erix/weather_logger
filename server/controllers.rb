@@ -30,7 +30,7 @@ class App < Sinatra::Base
     @stream = DataStream.find(id)
     if @stream
       t = Time.now - (24 * 3600)
-      @values =  @stream.values.where(:created_at.gt => t).to_a
+      @values =  @stream.values.where(:created_at.gt => t).asc(:created_at).to_a
       # pp @values.first
       render :rabl, :stream, :format => :json
     else
